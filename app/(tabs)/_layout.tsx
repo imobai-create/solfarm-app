@@ -49,6 +49,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="farmcoin"
+        options={{
+          title: 'FARMCOIN',
+          tabBarIcon: ({ color, size }) => <Ionicons name="logo-bitcoin" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="financeiro"
         options={{
           title: 'Financeiro',
