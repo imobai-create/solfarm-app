@@ -82,8 +82,9 @@ export default function ScannerScreen() {
     const opts: ImagePicker.ImagePickerOptions = {
       mediaTypes: ['images'],
       base64: true,
-      quality: 0.7,
+      quality: 0.4,   // comprime mais para reduzir payload
       exif: true,
+      allowsEditing: false,
     }
 
     const res = fromCamera
