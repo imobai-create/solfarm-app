@@ -4,6 +4,7 @@ import {
   Alert, ActivityIndicator, Image, Platform,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
+import * as ImageManipulator from 'expo-image-manipulator'
 import * as Location from 'expo-location'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -81,10 +82,9 @@ export default function ScannerScreen() {
 
     const opts: ImagePicker.ImagePickerOptions = {
       mediaTypes: ['images'],
-      base64: true,
-      quality: 0.4,   // comprime mais para reduzir payload
+      base64: false,
+      quality: 1,
       exif: true,
-      allowsEditing: false,
     }
 
     const res = fromCamera
@@ -94,8 +94,16 @@ export default function ScannerScreen() {
     if (res.canceled || !res.assets[0]) return
 
     const asset = res.assets[0]
-    setImageUri(asset.uri)
-    setImageBase64(asset.base64 ?? null)
+
+    // Redimensiona para máx 1024px e comprime — reduz de ~5MB para ~200KB
+    const manipulated = await ImageManipulator.manipulateAsync(
+      asset.uri,
+      [{ resize: { width: 1024 } }],
+      { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+    )
+
+    setImageUri(manipulated.uri)
+    setImageBase64(manipulated.base64 ?? null)
     setResult(null)
   }
 
