@@ -39,7 +39,13 @@ export default function TabsLayout() {
         options={{
           title: 'Scan IA',
           tabBarIcon: ({ color, size }) => <Ionicons name="scan" size={size} color={color} />,
-          tabBarBadge: undefined,
+        }}
+      />
+      <Tabs.Screen
+        name="receita"
+        options={{
+          title: 'Receita',
+          tabBarIcon: ({ color, size }) => <Ionicons name="document-text" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
