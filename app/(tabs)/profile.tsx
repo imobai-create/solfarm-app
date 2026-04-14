@@ -75,12 +75,14 @@ export default function ProfileScreen() {
               <View style={[styles.planIndicator, { backgroundColor: plan.color }]} />
             </View>
             <Text style={styles.planCardDesc}>{plan.desc}</Text>
-            {user.plan === 'FREE' && (
-              <TouchableOpacity style={[styles.upgradeBtn, { backgroundColor: Colors.primary }]}
-                onPress={() => Alert.alert('Upgrade', 'Upgrade de plano em breve disponível!')}>
-                <Text style={styles.upgradeBtnText}>🚀 Fazer Upgrade</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={[styles.upgradeBtn, { backgroundColor: user.plan === 'FREE' ? Colors.primary : Colors.gray500 }]}
+              onPress={() => router.push('/planos')}
+            >
+              <Text style={styles.upgradeBtnText}>
+                {user.plan === 'FREE' ? '🚀 Fazer Upgrade' : '📋 Ver Planos'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 

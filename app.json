@@ -16,11 +16,13 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.solfarm.app",
+      "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos sua localização para identificar sua região e exibir dados de satélite relevantes.",
         "NSLocationAlwaysUsageDescription": "Usamos sua localização para monitoramento contínuo das suas áreas.",
         "NSCameraUsageDescription": "Usamos a câmera para fotos das suas lavouras.",
-        "NSPhotoLibraryUsageDescription": "Acesso à galeria para adicionar fotos às suas áreas."
+        "NSPhotoLibraryUsageDescription": "Acesso à galeria para adicionar fotos às suas áreas.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -33,7 +35,9 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "CAMERA",
-        "READ_EXTERNAL_STORAGE"
+        "READ_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -54,6 +58,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "493d20cb-12cc-499d-8c47-58b3d866df52"
+      }
+    },
+    "owner": "antonio88-88"
   }
 }
