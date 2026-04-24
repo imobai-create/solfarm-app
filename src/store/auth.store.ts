@@ -11,6 +11,7 @@ interface AuthState {
   login: (data: LoginInput) => Promise<void>
   register: (data: RegisterInput) => Promise<void>
   logout: () => Promise<void>
+  deleteAccount: () => Promise<void>
   loadUser: () => Promise<void>
   clearError: () => void
 }
@@ -52,6 +53,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     await authService.logout()
     set({ user: null, isAuthenticated: false })
+  },
+
+  deleteAccount: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      await authService.deleteAccount()
+      set({ user: null, isAuthenticated: false })
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'Erro ao excluir conta'
+      set({ error: msg })
+      throw err
+    } finally {
+      set({ isLoading: false })
+    }
   },
 
   loadUser: async () => {

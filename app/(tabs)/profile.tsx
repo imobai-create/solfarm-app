@@ -114,6 +114,17 @@ export default function ProfileScreen() {
           <Ionicons name="log-out-outline" size={20} color={Colors.danger} />
           <Text style={styles.logoutText}>Sair da conta</Text>
         </TouchableOpacity>
+
+        {/* Zona de perigo */}
+        <Text style={styles.sectionTitle}>Zona de perigo</Text>
+        <View style={styles.menuSection}>
+          <MenuItem
+            icon="trash-outline"
+            label="Excluir minha conta"
+            onPress={() => router.push('/delete-account')}
+            danger
+          />
+        </View>
       </View>
     </ScrollView>
   )
@@ -129,15 +140,16 @@ function StatCard({ value, label, icon }: { value: number; label: string; icon: 
   )
 }
 
-function MenuItem({ icon, label, onPress, right }: {
-  icon: string; label: string; onPress?: () => void; right?: React.ReactNode
+function MenuItem({ icon, label, onPress, right, danger }: {
+  icon: string; label: string; onPress?: () => void; right?: React.ReactNode; danger?: boolean
 }) {
+  const color = danger ? Colors.danger : Colors.gray600
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
-      <Ionicons name={icon as any} size={20} color={Colors.gray600} style={styles.menuIcon} />
-      <Text style={styles.menuLabel}>{label}</Text>
+      <Ionicons name={icon as any} size={20} color={color} style={styles.menuIcon} />
+      <Text style={[styles.menuLabel, danger && { color: Colors.danger, fontWeight: '600' }]}>{label}</Text>
       <View style={{ flex: 1 }} />
-      {right ?? <Ionicons name="chevron-forward" size={16} color={Colors.gray300} />}
+      {right ?? <Ionicons name="chevron-forward" size={16} color={danger ? Colors.danger : Colors.gray300} />}
     </TouchableOpacity>
   )
 }
@@ -174,6 +186,6 @@ const styles = StyleSheet.create({
   verifiedText: { fontSize: 11, color: Colors.success, fontWeight: '700' },
   notVerified: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
   versionText: { fontSize: 12, color: Colors.gray400 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.dangerBg, borderRadius: 14, height: 50, marginBottom: 40 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.dangerBg, borderRadius: 14, height: 50, marginBottom: 24 },
   logoutText: { fontSize: 15, fontWeight: '700', color: Colors.danger },
 })

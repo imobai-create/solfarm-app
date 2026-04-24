@@ -66,6 +66,15 @@ export default function RootLayout() {
               headerTintColor: Colors.white,
             }}
           />
+          <Stack.Screen
+            name="delete-account"
+            options={{
+              headerShown: true,
+              headerTitle: 'Excluir conta',
+              headerStyle: { backgroundColor: Colors.danger },
+              headerTintColor: Colors.white,
+            }}
+          />
         </Stack>
       </QueryClientProvider>
     </GestureHandlerRootView>

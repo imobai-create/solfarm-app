@@ -30,6 +30,12 @@ export const authService = {
     await SecureStore.deleteItemAsync('refreshToken')
   },
 
+  async deleteAccount(): Promise<void> {
+    await api.delete('/auth/me')
+    await SecureStore.deleteItemAsync('accessToken')
+    await SecureStore.deleteItemAsync('refreshToken')
+  },
+
   async getStoredToken(): Promise<string | null> {
     return SecureStore.getItemAsync('accessToken')
   },
