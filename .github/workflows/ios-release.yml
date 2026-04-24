@@ -1,0 +1,53 @@
+name: iOS Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS profile'
+        type: choice
+        default: production
+        options:
+          - production
+          - preview
+      submit:
+        description: 'Auto-submit to App Store after build'
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    name: Build & submit iOS
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Verify Expo auth
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas whoami
+
+      - name: Build iOS (and optionally submit)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          PROFILE="${{ inputs.profile || 'production' }}"
+          SUBMIT_FLAG=""
+          if [ "${{ inputs.submit == null && 'true' || inputs.submit }}" = "true" ]; then
+            SUBMIT_FLAG="--auto-submit"
+          fi
+          echo "Running: eas build --platform ios --profile $PROFILE --non-interactive $SUBMIT_FLAG"
+          eas build --platform ios --profile "$PROFILE" --non-interactive $SUBMIT_FLAG
