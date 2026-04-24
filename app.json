@@ -2,7 +2,7 @@
   "expo": {
     "name": "SolFarm",
     "slug": "solfarm-app",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -62,9 +62,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "493d20cb-12cc-499d-8c47-58b3d866df52"
+        "projectId": "72d7177f-4f24-4f98-8a89-851a496922bc"
       }
     },
-    "owner": "antonio88-88"
+    "owner": "antonioterra"
   }
 }
