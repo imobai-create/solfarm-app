@@ -97,11 +97,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </Link>
         </View>
-
-        {/* Demo hint */}
-        <View style={styles.demo}>
-          <Text style={styles.demoText}>🧪 Demo: joao@solfarm.com.br / solfarm123</Text>
-        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -141,9 +136,4 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   footerText: { color: Colors.gray500, fontSize: 14 },
   footerLink: { color: Colors.primary, fontSize: 14, fontWeight: '700' },
-  demo: {
-    marginTop: 24, padding: 12, backgroundColor: Colors.earthLight,
-    borderRadius: 8, alignItems: 'center',
-  },
-  demoText: { fontSize: 12, color: Colors.earth },
 })
