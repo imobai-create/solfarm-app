@@ -35,24 +35,13 @@ const CORES_CAT: Record<string, string> = {
 }
 
 export default function FinanceiroScreen() {
-  const [cultura, setCultura] = useState('Soja')
-  const [area, setArea] = useState('450')
+  const [cultura, setCultura] = useState('')
+  const [area, setArea] = useState('')
   const [safra, setSafra] = useState('2025/2026')
   const [aba, setAba] = useState<'receitas' | 'custos' | 'resultado'>('resultado')
 
-  const [receitas, setReceitas] = useState<Receita[]>([
-    { id: uid(), descricao: 'Soja — produção estimada', quantidade: 2700, precoUnitario: 130 },
-  ])
-
-  const [custos, setCustos] = useState<Custo[]>([
-    { id: uid(), descricao: 'Sementes certificadas', valor: 18000, categoria: 'Insumo' },
-    { id: uid(), descricao: 'Fertilizantes NPK', valor: 42000, categoria: 'Insumo' },
-    { id: uid(), descricao: 'Defensivos / inoculante', valor: 31000, categoria: 'Insumo' },
-    { id: uid(), descricao: 'Funcionários temporários', valor: 12000, categoria: 'Mão de Obra' },
-    { id: uid(), descricao: 'Aluguel de colheitadeira', valor: 22500, categoria: 'Maquinário' },
-    { id: uid(), descricao: 'Arrendamento da terra', valor: 36000, categoria: 'Arrendamento' },
-    { id: uid(), descricao: 'Transporte e logística', valor: 9000, categoria: 'Outros' },
-  ])
+  const [receitas, setReceitas] = useState<Receita[]>([])
+  const [custos, setCustos] = useState<Custo[]>([])
 
   const totalReceitas = useMemo(() =>
     receitas.reduce((s, r) => s + r.quantidade * r.precoUnitario, 0), [receitas])
@@ -90,7 +79,9 @@ export default function FinanceiroScreen() {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: lucrativo ? Colors.primaryDark : '#dc2626' }]}>
         <Text style={styles.headerTitle}>💰 Fluxo de Caixa</Text>
-        <Text style={styles.headerSub}>{cultura} · {area} ha · Safra {safra}</Text>
+        <Text style={styles.headerSub}>
+          {cultura || area ? `${cultura}${cultura && area ? ' · ' : ''}${area ? area + ' ha' : ''} · Safra ${safra}` : `Safra ${safra} · configure sua cultura e área`}
+        </Text>
         <View style={styles.resultRow}>
           <View style={styles.resultItem}>
             <Text style={styles.resultLabel}>Receita</Text>

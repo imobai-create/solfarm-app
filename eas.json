@@ -29,7 +29,8 @@
         "EXPO_PUBLIC_API_URL": "https://solfarm-api-production.up.railway.app"
       },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       },
       "android": {
         "buildType": "app-bundle"
@@ -39,7 +40,8 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "antonioterra@solfarm.com.br"
+        "appleId": "antonioterra@solfarm.com.br",
+        "ascAppId": "6762160193"
       },
       "android": {
         "track": "internal"

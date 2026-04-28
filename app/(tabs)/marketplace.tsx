@@ -36,8 +36,7 @@ export default function MarketplaceScreen() {
       const res = await api.get('/products', { params: { limit: 20 } })
       setProducts(res.data.data ?? res.data ?? [])
     } catch {
-      // Usa dados mock quando a API de produtos não estiver pronta
-      setProducts(MOCK_PRODUCTS)
+      setProducts([])
     } finally {
       setIsLoading(false)
     }
@@ -117,8 +116,11 @@ export default function MarketplaceScreen() {
         renderItem={({ item }) => <ProductCard product={item} />}
         ListEmptyComponent={!isLoading ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>🔍</Text>
-            <Text style={styles.emptyText}>Nenhum produto encontrado</Text>
+            <Text style={styles.emptyEmoji}>🌱</Text>
+            <Text style={styles.emptyText}>Em breve!</Text>
+            <Text style={[styles.emptyText, { fontSize: 13, marginTop: 4 }]}>
+              Estamos conectando produtores e fornecedores.
+            </Text>
           </View>
         ) : null}
       />
@@ -181,16 +183,6 @@ function categoryEmoji(cat: ProductCategory): string {
   }
   return map[cat] ?? '📦'
 }
-
-// Mock para quando a API ainda não tem rota de produtos
-const MOCK_PRODUCTS: Product[] = [
-  { id: '1', name: 'Fertilizante NPK 10-10-10', description: 'Alta performance para gramíneas.', category: 'FERTILIZANTE', price: 189.90, unit: 'saco 50kg', stock: 500, images: [], brand: 'Mosaic', isFeatured: true, state: 'MT', city: 'Cuiabá' },
-  { id: '2', name: 'Herbicida Roundup Original', description: 'Controle de plantas daninhas.', category: 'DEFENSIVO', price: 89.50, unit: 'litro', stock: 200, images: [], brand: 'Bayer', isFeatured: true, state: 'MT', city: 'Cuiabá' },
-  { id: '3', name: 'Semente de Soja M8349 IPRO', description: 'Alta produtividade, resist. ferrugem.', category: 'SEMENTE', price: 420.00, unit: 'saco 40kg', stock: 150, images: [], brand: 'Monsoy', isFeatured: false, state: 'MT', city: 'Cuiabá' },
-  { id: '4', name: 'Inoculante Nitrobacter', description: 'Fixação biológica de nitrogênio.', category: 'INOCULANTE', price: 28.90, unit: 'dose/100kg', stock: 1000, images: [], brand: 'Total Biotecnologia', isFeatured: true, state: 'MT', city: 'Cuiabá' },
-  { id: '5', name: 'Pulverizador Costal 20L', description: 'Elétrico, bateria 12V, 6h autonomia.', category: 'FERRAMENTA', price: 650.00, unit: 'unidade', stock: 30, images: [], brand: 'Guarany', isFeatured: false, state: 'MT', city: 'Cuiabá' },
-  { id: '6', name: 'Urea Agrícola 45% N', description: 'Fonte de nitrogênio para cobertura.', category: 'FERTILIZANTE', price: 145.00, unit: 'saco 50kg', stock: 800, images: [], brand: 'Petrobras', isFeatured: false, state: 'GO', city: 'Goiânia' },
-]
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },

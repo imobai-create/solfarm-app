@@ -1,6 +1,6 @@
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  RefreshControl, ActivityIndicator,
+  RefreshControl, ActivityIndicator, Platform,
 } from 'react-native'
 import { router } from 'expo-router'
 import { useEffect, useState } from 'react'
@@ -79,8 +79,8 @@ export default function HomeScreen() {
           <QuickAction icon="people" label="Comunidade" color={Colors.primaryDark} onPress={() => router.push('/(tabs)/community')} />
         </View>
 
-        {/* Plano */}
-        {user?.plan === 'FREE' && (
+        {/* Plano — banner de upgrade escondido no iOS (App Store 3.1.1) */}
+        {user?.plan === 'FREE' && Platform.OS !== 'ios' && (
           <TouchableOpacity style={styles.planBanner}>
             <LinearGradient colors={[Colors.earth, Colors.warning]} style={styles.planBannerGrad}>
               <Ionicons name="rocket-outline" size={24} color={Colors.white} />

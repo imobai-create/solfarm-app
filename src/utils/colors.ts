@@ -1,11 +1,19 @@
 export const Colors = {
-  // Verde SolFarm
-  primary: '#16a34a',       // green-600
-  primaryDark: '#15803d',   // green-700
-  primaryLight: '#22c55e',  // green-500
-  primaryBg: '#f0fdf4',     // green-50
+  // Verde SolFarm (alinhado com família EnergyCoin/GrãoFinance/GreenCoinCash)
+  primary: '#10B981',       // emerald-500 — compartilhado com Grão
+  primaryDark: '#065F46',   // emerald-900
+  primaryLight: '#34D399',  // emerald-400
+  primaryBg: '#ECFDF5',     // emerald-50
 
-  // Tons de terra / agro
+  // Accent ciano — identidade on-chain/tech comum aos apps
+  accent: '#22D3EE',         // cyan-400
+  accentLight: '#67E8F9',
+  accentBg: '#ECFEFF',
+
+  // Dourado — valor/destaque
+  gold: '#F59E0B',
+
+  // Tons de terra / agro (identidade SolFarm)
   earth: '#92400e',         // amber-800
   earthLight: '#fef3c7',    // amber-100
   soil: '#78350f',          // amber-900
@@ -41,13 +49,83 @@ export const Colors = {
   gray800: '#1f2937',
   gray900: '#111827',
 
-  // Background
-  background: '#f9fafb',
-  card: '#ffffff',
-  border: '#e5e7eb',
+  // Background (light — identidade agro, campo aberto, sol)
+  background: '#F7F6F2',
+  card: '#FFFFFF',
+  border: '#E8E7E1',
+
+  // Texto semântico (substitui uso avulso de gray900/gray500)
+  text: '#1A1A1A',
+  textSecondary: '#666666',
+  textMuted: '#999999',
 } as const
 
 export type ColorKey = keyof typeof Colors
+
+// ─── Design tokens compartilhados com EnergyCoin/GrãoFinance/GreenCoinCash ───
+
+export const Typography = {
+  xs: 11,
+  sm: 13,
+  base: 15,
+  md: 17,
+  lg: 20,
+  xl: 24,
+  xxl: 30,
+  xxxl: 38,
+
+  regular: '400' as const,
+  medium: '500' as const,
+  semibold: '600' as const,
+  bold: '700' as const,
+}
+
+export const Spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 }
+
+export const Radius = { sm: 8, md: 12, lg: 16, xl: 24, full: 999 }
+
+export const Shadow = {
+  card: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  premium: {
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  floating: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+}
+
+export const Surface = {
+  // Gradiente hero (headers de tela)
+  heroGradientStart: '#10B981',
+  heroGradientEnd: '#065F46',
+
+  // Camadas
+  cardElevated: '#FFFFFF',
+  cardSubtle: '#FBFAF6',
+  divider: '#EDECE6',
+
+  // Chips (bg suave pra ícones/status)
+  chipGreen: '#E7EFEA',
+  chipGold: '#FBF3DC',
+  chipBlue: '#E6EEF7',
+  chipPurple: '#EEE4F4',
+  chipOrange: '#FCEFE0',
+  chipEarth: '#F5ECE0',
+}
 
 // NDVI → cor
 export function ndviColor(ndvi: number): string {

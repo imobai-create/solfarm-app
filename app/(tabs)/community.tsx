@@ -1,10 +1,10 @@
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, ScrollView, RefreshControl, Alert,
+  TextInput, ScrollView, RefreshControl, Alert, Modal,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Colors } from '../../src/utils/colors'
 import type { Post, PostCategory } from '../../src/types'
 
@@ -17,45 +17,68 @@ const CATEGORIES: { key: PostCategory | 'ALL'; label: string; emoji: string }[] 
   { key: 'VENDA', label: 'Ofertas', emoji: '💰' },
 ]
 
-// Mock de posts até a API de comunidade estar pronta
-const MOCK_POSTS: Post[] = [
-  {
-    id: '1', content: 'Pessoal, identificamos foco de ferrugem asiática nos talhões próximos a Sorriso. NDVI caiu 0.15 em 7 dias. Recomendo aplicação preventiva com triazol. Alguém viu sintomas?', title: 'Alerta: Ferrugem asiática avançando no norte do MT',
-    category: 'ALERTA', likes: 47, images: [], state: 'MT', city: 'Sorriso', createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
-    user: { id: '1', name: 'João da Silva', state: 'MT', city: 'Sorriso' },
-  },
-  {
-    id: '2', content: 'Usei inoculante pela primeira vez esse ano e cortei R$180/ha em ureia. Resultado foi 72 sacas/ha no talhão 1. Vale muito a pena o custo-benefício!', title: 'Resultado safra 23/24: 72 sacas/ha com inoculante',
-    category: 'RESULTADO', likes: 123, images: [], state: 'MT', city: 'Sorriso', createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
-    user: { id: '2', name: 'Maria Aparecida', state: 'MT', city: 'Lucas do Rio Verde' },
-  },
-  {
-    id: '3', content: 'Dica rápida: para reduzir custos com herbicida, faça o levantamento das plantas daninhas antes de aplicar. Cada cultura tem suas espécies-problema. Identificação correta = produto certo = menos custo.', title: 'Dica para reduzir custo com herbicidas',
-    category: 'DICA', likes: 88, images: [], state: 'GO', city: 'Rio Verde', createdAt: new Date(Date.now() - 48 * 3600000).toISOString(),
-    user: { id: '3', name: 'Carlos Engenheiro Agrônomo', state: 'GO', city: 'Rio Verde' },
-  },
-  {
-    id: '4', content: 'Alguém tem experiência com soja transgênica no Cerrado da Bahia? Qual variedade está dando melhor resultado em solo de cerrado argiloso? Obrigado pela ajuda!',
-    category: 'DUVIDA', likes: 12, images: [], state: 'BA', city: 'Luís Eduardo Magalhães', createdAt: new Date(Date.now() - 3 * 24 * 3600000).toISOString(),
-    user: { id: '4', name: 'Pedro Agricola', state: 'BA', city: 'LEM' },
-  },
-  {
-    id: '5', content: 'Vendo: 200 sacas de soja M8349 — semente fiscalizada, tratada, lote 2024. R$ 380/saco. Retirada na fazenda ou entrego na região. WhatsApp: (65) 99988-7766',
-    category: 'VENDA', likes: 5, images: [], state: 'MT', city: 'Sinop', createdAt: new Date(Date.now() - 4 * 24 * 3600000).toISOString(),
-    user: { id: '5', name: 'Fazenda Santa Fé', state: 'MT', city: 'Sinop' },
-  },
+const NEW_POST_CATEGORIES: { key: PostCategory; label: string; emoji: string }[] = [
+  { key: 'ALERTA', label: 'Alerta', emoji: '⚠️' },
+  { key: 'DICA', label: 'Dica', emoji: '💡' },
+  { key: 'RESULTADO', label: 'Resultado', emoji: '📊' },
+  { key: 'DUVIDA', label: 'Dúvida', emoji: '❓' },
+  { key: 'VENDA', label: 'Venda', emoji: '💰' },
 ]
 
 export default function CommunityScreen() {
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
+  const [posts, setPosts] = useState<Post[]>([])
   const [category, setCategory] = useState<PostCategory | 'ALL'>('ALL')
   const [refreshing, setRefreshing] = useState(false)
   const [search, setSearch] = useState('')
+
+  // Modal: novo post
+  const [showNewPost, setShowNewPost] = useState(false)
+  const [newPostCategory, setNewPostCategory] = useState<PostCategory>('DICA')
+  const [newPostContent, setNewPostContent] = useState('')
+
+  // Modal: comentário
+  const [commentPost, setCommentPost] = useState<Post | null>(null)
+  const [commentText, setCommentText] = useState('')
+
+  const listRef = useRef<FlatList<Post>>(null)
 
   async function onRefresh() {
     setRefreshing(true)
     await new Promise((r) => setTimeout(r, 800))
     setRefreshing(false)
+  }
+
+  function handlePublish() {
+    if (newPostContent.trim().length < 20) {
+      Alert.alert('Conteúdo muito curto', 'O post precisa ter pelo menos 20 caracteres.')
+      return
+    }
+    const newPost: Post = {
+      id: Date.now().toString(),
+      content: newPostContent.trim(),
+      category: newPostCategory,
+      user: { id: 'me', name: 'Você', state: '', city: '' },
+      likes: 0,
+      images: [],
+      createdAt: new Date().toISOString(),
+    }
+    setPosts((ps) => [newPost, ...ps])
+    setNewPostContent('')
+    setNewPostCategory('DICA')
+    setShowNewPost(false)
+    setTimeout(() => {
+      listRef.current?.scrollToOffset({ offset: 0, animated: true })
+    }, 100)
+  }
+
+  function handleSendComment() {
+    if (!commentText.trim()) {
+      Alert.alert('Campo vazio', 'Escreva um comentário antes de enviar.')
+      return
+    }
+    Alert.alert('Comentário enviado!', 'Seu comentário foi adicionado.')
+    setCommentText('')
+    setCommentPost(null)
   }
 
   const filtered = posts.filter((p) => {
@@ -67,7 +90,7 @@ export default function CommunityScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={[Colors.primaryDark, Colors.primary]} style={styles.header}>
-        <Text style={styles.headerTitle}>👥 Comunidade</Text>
+        <Text style={styles.headerTitle}>Comunidade</Text>
         <Text style={styles.headerSub}>Troca de conhecimento entre produtores</Text>
         <View style={styles.searchWrap}>
           <Ionicons name="search" size={18} color={Colors.gray400} />
@@ -76,6 +99,7 @@ export default function CommunityScreen() {
       </LinearGradient>
 
       <FlatList
+        ref={listRef}
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
@@ -94,24 +118,104 @@ export default function CommunityScreen() {
             ))}
           </ScrollView>
         }
-        renderItem={({ item }) => <PostCard post={item} onLike={() => setPosts((ps) => ps.map((p) => p.id === item.id ? { ...p, likes: p.likes + 1 } : p))} />}
+        renderItem={({ item }) => (
+          <PostCard
+            post={item}
+            onLike={() => setPosts((ps) => ps.map((p) => p.id === item.id ? { ...p, likes: p.likes + 1 } : p))}
+            onComment={() => setCommentPost(item)}
+          />
+        )}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🌾</Text>
-            <Text style={styles.emptyText}>Nenhum post encontrado</Text>
+            <Text style={styles.emptyText}>Seja o primeiro a publicar!</Text>
+            <Text style={[styles.emptyText, { fontSize: 13, marginTop: 4 }]}>
+              Compartilhe conhecimento com outros produtores.
+            </Text>
           </View>
         }
       />
 
       {/* FAB novo post */}
-      <TouchableOpacity style={styles.fab} onPress={() => Alert.alert('Em breve!', 'A publicação de posts estará disponível em breve.')}>
+      <TouchableOpacity style={styles.fab} onPress={() => setShowNewPost(true)}>
         <Ionicons name="add" size={28} color={Colors.white} />
       </TouchableOpacity>
+
+      {/* Modal: Nova publicação */}
+      <Modal visible={showNewPost} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowNewPost(false)}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Nova publicação</Text>
+
+          <Text style={styles.modalSectionLabel}>Categoria</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalCatsScroll}>
+            {NEW_POST_CATEGORIES.map((cat) => (
+              <TouchableOpacity
+                key={cat.key}
+                style={[styles.catBtn, newPostCategory === cat.key && styles.catBtnActive, { marginBottom: 4 }]}
+                onPress={() => setNewPostCategory(cat.key)}
+              >
+                <Text style={styles.catEmoji}>{cat.emoji}</Text>
+                <Text style={[styles.catLabel, newPostCategory === cat.key && styles.catLabelActive]}>{cat.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <Text style={styles.modalSectionLabel}>Conteúdo</Text>
+          <TextInput
+            multiline
+            numberOfLines={6}
+            placeholder="Compartilhe seu conhecimento com outros produtores..."
+            placeholderTextColor={Colors.gray400}
+            value={newPostContent}
+            onChangeText={setNewPostContent}
+            style={styles.modalTextInput}
+          />
+          <Text style={[styles.charCount, newPostContent.trim().length < 20 && newPostContent.length > 0 ? { color: Colors.danger } : {}]}>
+            {newPostContent.trim().length}/20 mín.
+          </Text>
+
+          <TouchableOpacity onPress={handlePublish} style={styles.publishBtn}>
+            <Text style={styles.publishBtnText}>Publicar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setShowNewPost(false); setNewPostContent('') }} style={styles.cancelBtn}>
+            <Text style={styles.cancelBtnText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* Modal: Comentar */}
+      <Modal visible={commentPost !== null} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setCommentPost(null)}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Comentar</Text>
+          {commentPost && (
+            <Text style={styles.commentPostTitle} numberOfLines={2}>
+              {commentPost.title ?? commentPost.content.slice(0, 60) + '...'}
+            </Text>
+          )}
+
+          <TextInput
+            multiline
+            numberOfLines={5}
+            placeholder="Escreva seu comentário..."
+            placeholderTextColor={Colors.gray400}
+            value={commentText}
+            onChangeText={setCommentText}
+            style={[styles.modalTextInput, { marginTop: 16 }]}
+          />
+
+          <TouchableOpacity onPress={handleSendComment} style={styles.publishBtn}>
+            <Text style={styles.publishBtnText}>Enviar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setCommentPost(null); setCommentText('') }} style={styles.cancelBtn}>
+            <Text style={styles.cancelBtnText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   )
 }
 
-function PostCard({ post, onLike }: { post: Post; onLike: () => void }) {
+function PostCard({ post, onLike, onComment }: { post: Post; onLike: () => void; onComment: () => void }) {
   const catConfig = CATEGORIES.find((c) => c.key === post.category)
   const timeAgo = formatTimeAgo(post.createdAt)
 
@@ -148,7 +252,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: () => void }) {
           <Ionicons name="heart-outline" size={18} color={Colors.danger} />
           <Text style={styles.likeCount}>{post.likes}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.commentBtn} onPress={() => Alert.alert('Em breve!', 'Comentários em desenvolvimento.')}>
+        <TouchableOpacity style={styles.commentBtn} onPress={onComment}>
           <Ionicons name="chatbubble-outline" size={18} color={Colors.gray500} />
           <Text style={styles.commentText}>Comentar</Text>
         </TouchableOpacity>
@@ -211,4 +315,16 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingTop: 48 },
   emptyEmoji: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 15, color: Colors.gray500 },
+  // Modal estilos
+  modalContainer: { flex: 1, backgroundColor: Colors.white, padding: 20, paddingTop: 60 },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: Colors.gray900, marginBottom: 20 },
+  modalSectionLabel: { fontWeight: '600', marginBottom: 8, color: Colors.gray700, fontSize: 14 },
+  modalCatsScroll: { marginBottom: 16 },
+  modalTextInput: { borderWidth: 1, borderColor: Colors.border, borderRadius: 12, padding: 12, fontSize: 15, textAlignVertical: 'top', minHeight: 120, color: Colors.gray900 },
+  charCount: { fontSize: 12, color: Colors.gray400, textAlign: 'right', marginTop: 4, marginBottom: 16 },
+  publishBtn: { backgroundColor: Colors.primary, borderRadius: 12, height: 48, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  publishBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
+  cancelBtn: { alignItems: 'center', padding: 12 },
+  cancelBtnText: { color: Colors.gray500, fontWeight: '600', fontSize: 15 },
+  commentPostTitle: { fontSize: 13, color: Colors.gray500, marginBottom: 4, lineHeight: 18 },
 })

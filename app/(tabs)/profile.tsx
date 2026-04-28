@@ -1,11 +1,12 @@
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Platform, Linking,
 } from 'react-native'
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAuthStore } from '../../src/store/auth.store'
+import { api } from '../../src/services/api'
 import { Colors } from '../../src/utils/colors'
 
 const PLAN_LABELS: Record<string, { label: string; color: string; desc: string }> = {
@@ -33,6 +34,29 @@ export default function ProfileScreen() {
     ])
   }
 
+  async function handleDeleteAccount() {
+    Alert.alert(
+      'Excluir conta',
+      'Tem certeza que deseja excluir sua conta permanentemente? Todos os seus dados serão removidos e esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir permanentemente',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.delete('/auth/account')
+              await logout()
+              router.replace('/(auth)/login')
+            } catch (err: any) {
+              Alert.alert('Erro', err?.response?.data?.error ?? 'Não foi possível excluir a conta. Tente novamente.')
+            }
+          },
+        },
+      ]
+    )
+  }
+
   if (!user) return null
 
   return (
@@ -51,10 +75,12 @@ export default function ProfileScreen() {
           </Text>
         )}
 
-        {/* Plano */}
-        <View style={[styles.planBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-          <Text style={styles.planText}>Plano {plan.label}</Text>
-        </View>
+        {/* Plano — badge escondido no iOS (App Store 3.1.1) */}
+        {Platform.OS !== 'ios' && (
+          <View style={[styles.planBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+            <Text style={styles.planText}>Plano {plan.label}</Text>
+          </View>
+        )}
       </LinearGradient>
 
       <View style={styles.body}>
@@ -67,29 +93,31 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Plano atual */}
-        <View style={styles.planSection}>
-          <View style={[styles.planCard, { borderColor: plan.color }]}>
-            <View style={styles.planCardHeader}>
-              <Text style={[styles.planCardTitle, { color: plan.color }]}>🌾 Plano {plan.label}</Text>
-              <View style={[styles.planIndicator, { backgroundColor: plan.color }]} />
+        {/* Plano atual — sem CTA de upgrade no iOS (App Store 3.1.1) */}
+        {Platform.OS !== 'ios' && (
+          <View style={styles.planSection}>
+            <View style={[styles.planCard, { borderColor: plan.color }]}>
+              <View style={styles.planCardHeader}>
+                <Text style={[styles.planCardTitle, { color: plan.color }]}>🌾 Plano {plan.label}</Text>
+                <View style={[styles.planIndicator, { backgroundColor: plan.color }]} />
+              </View>
+              <Text style={styles.planCardDesc}>{plan.desc}</Text>
+              <TouchableOpacity
+                style={[styles.upgradeBtn, { backgroundColor: user.plan === 'FREE' ? Colors.primary : Colors.gray500 }]}
+                onPress={() => router.push('/planos')}
+              >
+                <Text style={styles.upgradeBtnText}>
+                  {user.plan === 'FREE' ? '🚀 Fazer Upgrade' : '📋 Ver Planos'}
+                </Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.planCardDesc}>{plan.desc}</Text>
-            <TouchableOpacity
-              style={[styles.upgradeBtn, { backgroundColor: user.plan === 'FREE' ? Colors.primary : Colors.gray500 }]}
-              onPress={() => router.push('/planos')}
-            >
-              <Text style={styles.upgradeBtnText}>
-                {user.plan === 'FREE' ? '🚀 Fazer Upgrade' : '📋 Ver Planos'}
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View>
+        )}
 
         {/* Conta */}
         <Text style={styles.sectionTitle}>Conta</Text>
         <View style={styles.menuSection}>
-          <MenuItem icon="person-outline" label="Editar perfil" onPress={() => Alert.alert('Em breve', 'Edição de perfil em desenvolvimento.')} />
+          <MenuItem icon="person-outline" label="Editar perfil" onPress={() => router.push('/edit-profile')} />
           <MenuItem icon="notifications-outline" label="Notificações" right={<Switch value={notifications} onValueChange={setNotifications} trackColor={{ false: Colors.gray200, true: Colors.primary + '60' }} thumbColor={notifications ? Colors.primary : Colors.gray400} />} />
           <MenuItem icon="alert-circle-outline" label="Alertas de pragas e clima" right={<Switch value={alerts} onValueChange={setAlerts} trackColor={{ false: Colors.gray200, true: Colors.primary + '60' }} thumbColor={alerts ? Colors.primary : Colors.gray400} />} />
           <MenuItem icon="shield-checkmark-outline" label="Verificação da conta"
@@ -103,9 +131,9 @@ export default function ProfileScreen() {
         {/* Sobre */}
         <Text style={styles.sectionTitle}>Sobre</Text>
         <View style={styles.menuSection}>
-          <MenuItem icon="help-circle-outline" label="Central de ajuda" onPress={() => Alert.alert('Ajuda', 'Acesse solfarm.com.br/ajuda')} />
-          <MenuItem icon="document-text-outline" label="Termos de uso" onPress={() => {}} />
-          <MenuItem icon="lock-closed-outline" label="Política de privacidade" onPress={() => {}} />
+          <MenuItem icon="help-circle-outline" label="Central de ajuda" onPress={() => Alert.alert('Ajuda', 'Entre em contato pelo email suporte@solfarm.com.br')} />
+          <MenuItem icon="document-text-outline" label="Termos de uso" onPress={() => Linking.openURL('https://solfarm.com.br/termos')} />
+          <MenuItem icon="lock-closed-outline" label="Política de privacidade" onPress={() => Linking.openURL('https://solfarm.com.br/privacidade')} />
           <MenuItem icon="information-circle-outline" label="Versão 1.0.0" right={<Text style={styles.versionText}>SolFarm MVP</Text>} />
         </View>
 
@@ -113,6 +141,12 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color={Colors.danger} />
           <Text style={styles.logoutText}>Sair da conta</Text>
+        </TouchableOpacity>
+
+        {/* Excluir conta */}
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
+          <Ionicons name="trash-outline" size={16} color={Colors.gray400} />
+          <Text style={styles.deleteText}>Excluir minha conta</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -174,6 +208,8 @@ const styles = StyleSheet.create({
   verifiedText: { fontSize: 11, color: Colors.success, fontWeight: '700' },
   notVerified: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
   versionText: { fontSize: 12, color: Colors.gray400 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.dangerBg, borderRadius: 14, height: 50, marginBottom: 40 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.dangerBg, borderRadius: 14, height: 50, marginBottom: 12 },
   logoutText: { fontSize: 15, fontWeight: '700', color: Colors.danger },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, marginBottom: 40 },
+  deleteText: { fontSize: 13, color: Colors.gray400, textDecorationLine: 'underline' },
 })

@@ -66,6 +66,10 @@ export default function RootLayout() {
               headerTintColor: Colors.white,
             }}
           />
+          <Stack.Screen
+            name="edit-profile"
+            options={{ headerShown: false }}
+          />
         </Stack>
       </QueryClientProvider>
     </GestureHandlerRootView>
