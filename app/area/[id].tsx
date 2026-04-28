@@ -64,14 +64,25 @@ export default function AreaDetailScreen() {
     setIsGeneratingDiag(true)
     try {
       const diag = await diagnosticService.generate(id)
+      if (!diag?.id) {
+        Alert.alert('Erro', 'O servidor não retornou um diagnóstico válido. Tente novamente em instantes.')
+        return
+      }
       router.push(`/diagnostic/${diag.id}`)
     } catch (err: any) {
-      const msg = err?.response?.data?.error ?? 'Erro ao gerar diagnóstico.'
-      if (msg.includes('imagem')) {
+      const status = err?.response?.status
+      const apiMsg = err?.response?.data?.error
+      let msg: string
+      if (typeof apiMsg === 'string' && apiMsg.toLowerCase().includes('imagem')) {
         Alert.alert('Sem imagem', 'Busque e processe uma imagem de satélite primeiro.')
-      } else {
-        Alert.alert('Erro', msg)
+        return
       }
+      if (status === 500 || status === 502 || status === 503) {
+        msg = 'O serviço de diagnóstico está temporariamente indisponível. Tente novamente em alguns minutos.'
+      } else {
+        msg = apiMsg ?? 'Não foi possível gerar o diagnóstico agora.'
+      }
+      Alert.alert('Erro', msg)
     } finally {
       setIsGeneratingDiag(false)
     }

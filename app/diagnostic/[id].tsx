@@ -15,10 +15,17 @@ export default function DiagnosticScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'problems' | 'recommendations' | 'fertilization'>('overview')
 
+  const [loadError, setLoadError] = useState<string | null>(null)
+
   useEffect(() => {
     if (!id) return
+    setLoadError(null)
     diagnosticService.findOne(id)
       .then(setDiagnostic)
+      .catch((err: any) => {
+        const msg = err?.response?.data?.error
+        setLoadError(typeof msg === 'string' ? msg : 'Não foi possível carregar o diagnóstico.')
+      })
       .finally(() => setIsLoading(false))
   }, [id])
 
@@ -26,13 +33,34 @@ export default function DiagnosticScreen() {
     return <View style={styles.center}><ActivityIndicator size="large" color={Colors.primary} /></View>
   }
 
-  if (!diagnostic) {
-    return <View style={styles.center}><Text>Diagnóstico não encontrado.</Text></View>
+  if (loadError || !diagnostic) {
+    return (
+      <View style={styles.center}>
+        <Ionicons name="alert-circle-outline" size={48} color={Colors.gray400} />
+        <Text style={{ color: Colors.gray700, marginTop: 12, textAlign: 'center', paddingHorizontal: 32 }}>
+          {loadError ?? 'Diagnóstico não encontrado.'}
+        </Text>
+      </View>
+    )
   }
 
   const { score, healthStatus, healthLabel, summary, problems, recommendations,
     recommendedCultures, fertilizationPlan, satellite, area, yieldEstimate } = diagnostic
 
+  // Guard contra payload incompleto do servidor (evita crash em score.toFixed, etc.)
+  if (!area || typeof score !== 'number' || !satellite?.indices?.ndvi) {
+    return (
+      <View style={styles.center}>
+        <Ionicons name="alert-circle-outline" size={48} color={Colors.gray400} />
+        <Text style={{ color: Colors.gray700, marginTop: 12, textAlign: 'center', paddingHorizontal: 32 }}>
+          O servidor retornou um diagnóstico incompleto. Tente gerar novamente em instantes.
+        </Text>
+      </View>
+    )
+  }
+
+  const safeProblems = problems ?? []
+  const safeRecommendations = recommendations ?? []
   const zones = satellite?.zonesMap ?? []
   const centerLat = zones.length > 0 ? zones[Math.floor(zones.length / 2)].lat : -12.5
   const centerLng = zones.length > 0 ? zones[Math.floor(zones.length / 2)].lng : -55.7
@@ -59,7 +87,7 @@ export default function DiagnosticScreen() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll}>
         <View style={styles.tabs}>
           {(['overview', 'problems', 'recommendations', 'fertilization'] as const).map((tab) => {
-            const labels = { overview: 'Resumo', problems: `Problemas (${problems.length})`, recommendations: 'Recomendações', fertilization: 'Fertilização' }
+            const labels = { overview: 'Resumo', problems: `Problemas (${safeProblems.length})`, recommendations: 'Recomendações', fertilization: 'Fertilização' }
             return (
               <TouchableOpacity key={tab} style={[styles.tab, activeTab === tab && styles.tabActive]} onPress={() => setActiveTab(tab)}>
                 <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{labels[tab]}</Text>
@@ -126,7 +154,7 @@ export default function DiagnosticScreen() {
             )}
 
             {/* Estimativa de produtividade */}
-            {yieldEstimate.value > 0 && (
+            {yieldEstimate && yieldEstimate.value > 0 && (
               <>
                 <Text style={styles.sectionTitle}>📊 Estimativa de Produtividade</Text>
                 <View style={styles.yieldCard}>
@@ -151,10 +179,10 @@ export default function DiagnosticScreen() {
             )}
 
             {/* Culturas recomendadas */}
-            {recommendedCultures.length > 0 && (
+            {(recommendedCultures?.length ?? 0) > 0 && (
               <>
                 <Text style={styles.sectionTitle}>🌱 Culturas para Próxima Safra</Text>
-                {recommendedCultures.map((c, i) => (
+                {(recommendedCultures ?? []).map((c, i) => (
                   <View key={i} style={styles.cultureCard}>
                     <View style={styles.cultureScore}>
                       <Text style={styles.cultureScoreText}>{c.score}%</Text>
@@ -173,9 +201,9 @@ export default function DiagnosticScreen() {
         {/* ─── PROBLEMS ─── */}
         {activeTab === 'problems' && (
           <>
-            {problems.length === 0
+            {safeProblems.length === 0
               ? <View style={styles.emptyTab}><Text style={styles.emptyTabEmoji}>✅</Text><Text style={styles.emptyTabText}>Nenhum problema detectado!</Text></View>
-              : problems.map((p, i) => (
+              : safeProblems.map((p, i) => (
                 <View key={i} style={[styles.problemCard, { borderLeftColor: severityColor(p.severity) }]}>
                   <View style={styles.problemHeader}>
                     <View style={[styles.severityBadge, { backgroundColor: severityColor(p.severity) + '20' }]}>
@@ -197,7 +225,13 @@ export default function DiagnosticScreen() {
         {/* ─── RECOMMENDATIONS ─── */}
         {activeTab === 'recommendations' && (
           <>
-            {recommendations.map((r, i) => (
+            {safeRecommendations.length === 0 && (
+              <View style={styles.emptyTab}>
+                <Text style={styles.emptyTabEmoji}>📋</Text>
+                <Text style={styles.emptyTabText}>Nenhuma recomendação disponível.</Text>
+              </View>
+            )}
+            {safeRecommendations.map((r, i) => (
               <View key={i} style={styles.recCard}>
                 <View style={styles.recHeader}>
                   <View style={[styles.priorityBadge, { backgroundColor: priorityColor(r.priority) + '20' }]}>
@@ -240,7 +274,13 @@ export default function DiagnosticScreen() {
               <Text style={styles.vraTitle}>Aplicação em Taxa Variável (VRA)</Text>
               <Text style={styles.vraSubtitle}>Doses recomendadas por zona da propriedade</Text>
             </View>
-            {fertilizationPlan.map((z, i) => (
+            {(fertilizationPlan ?? []).length === 0 && (
+              <View style={styles.emptyTab}>
+                <Text style={styles.emptyTabEmoji}>📊</Text>
+                <Text style={styles.emptyTabText}>Plano de fertilização indisponível neste diagnóstico.</Text>
+              </View>
+            )}
+            {(fertilizationPlan ?? []).map((z, i) => (
               <View key={i} style={[styles.vraCard, z.priority === 'URGENTE' && styles.vraCardUrgente]}>
                 <View style={styles.vraCardHeader}>
                   <View style={[styles.zoneCircle, { backgroundColor: ndviColor(z.ndvi) }]}>

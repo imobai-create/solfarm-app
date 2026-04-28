@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../../src/store/auth.store'
 import { useAreasStore } from '../../src/store/areas.store'
 import { Colors, healthColor, cultureEmoji, cultureLabel } from '../../src/utils/colors'
-import { canShowPaidPlans, effectivePlan } from '../../src/utils/platform'
+import { canShowCommunity, canShowPaidPlans, effectivePlan } from '../../src/utils/platform'
 import type { Area } from '../../src/types'
 
 export default function HomeScreen() {
@@ -77,7 +77,9 @@ export default function HomeScreen() {
           <QuickAction icon="add-circle" label="Nova Área" color={Colors.primary} onPress={() => router.push('/area/new')} />
           <QuickAction icon="pulse" label="Diagnóstico" color={Colors.info} onPress={() => router.push('/(tabs)/areas')} />
           <QuickAction icon="storefront" label="Loja" color={Colors.earth} onPress={() => router.push('/(tabs)/marketplace')} />
-          <QuickAction icon="people" label="Comunidade" color={Colors.primaryDark} onPress={() => router.push('/(tabs)/community')} />
+          {canShowCommunity() && (
+            <QuickAction icon="people" label="Comunidade" color={Colors.primaryDark} onPress={() => router.push('/(tabs)/community')} />
+          )}
         </View>
 
         {/* Plano — banner de upgrade só onde planos pagos são oferecidos */}

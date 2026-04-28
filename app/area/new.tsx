@@ -34,6 +34,7 @@ export default function NewAreaScreen() {
   // Formulário
   const [name, setName] = useState('')
   const [culture, setCulture] = useState<CultureType | ''>('')
+  const [customCulture, setCustomCulture] = useState('')
   const [biome, setBiome] = useState<BiomeType | ''>('')
   const [state, setState] = useState('')
   const [city, setCity] = useState('')
@@ -86,12 +87,20 @@ export default function NewAreaScreen() {
   // ── Salva a área ──
   async function handleSave() {
     if (!name.trim()) { Alert.alert('Atenção', 'Digite o nome da área.'); return }
+    if (culture === 'OUTRO' && !customCulture.trim()) {
+      Alert.alert('Atenção', 'Como você selecionou "Outro", informe qual é a cultura.')
+      return
+    }
     setIsSaving(true)
     try {
       const polygon = toGeoJSON()
+      const finalDescription =
+        culture === 'OUTRO' && customCulture.trim()
+          ? `Cultura: ${customCulture.trim()}${description.trim() ? ` — ${description.trim()}` : ''}`
+          : description.trim() || undefined
       await createArea({
         name: name.trim(),
-        description: description.trim() || undefined,
+        description: finalDescription,
         culture: culture as CultureType || undefined,
         biome: biome as BiomeType || undefined,
         state: state.toUpperCase() || undefined,
@@ -222,6 +231,16 @@ export default function NewAreaScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+        {culture === 'OUTRO' && (
+          <TextInput
+            style={[styles.fieldInput, { marginTop: 10 }]}
+            placeholder="Especifique a cultura (ex.: Uva, Tomate, Banana)"
+            placeholderTextColor={Colors.gray400}
+            value={customCulture}
+            onChangeText={setCustomCulture}
+            autoCapitalize="words"
+          />
+        )}
       </View>
 
       {/* Bioma */}

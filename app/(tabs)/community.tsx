@@ -17,37 +17,8 @@ const CATEGORIES: { key: PostCategory | 'ALL'; label: string; emoji: string }[] 
   { key: 'VENDA', label: 'Ofertas', emoji: '💰' },
 ]
 
-// Mock de posts até a API de comunidade estar pronta
-const MOCK_POSTS: Post[] = [
-  {
-    id: '1', content: 'Pessoal, identificamos foco de ferrugem asiática nos talhões próximos a Sorriso. NDVI caiu 0.15 em 7 dias. Recomendo aplicação preventiva com triazol. Alguém viu sintomas?', title: 'Alerta: Ferrugem asiática avançando no norte do MT',
-    category: 'ALERTA', likes: 47, images: [], state: 'MT', city: 'Sorriso', createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
-    user: { id: '1', name: 'João da Silva', state: 'MT', city: 'Sorriso' },
-  },
-  {
-    id: '2', content: 'Usei inoculante pela primeira vez esse ano e cortei R$180/ha em ureia. Resultado foi 72 sacas/ha no talhão 1. Vale muito a pena o custo-benefício!', title: 'Resultado safra 23/24: 72 sacas/ha com inoculante',
-    category: 'RESULTADO', likes: 123, images: [], state: 'MT', city: 'Sorriso', createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
-    user: { id: '2', name: 'Maria Aparecida', state: 'MT', city: 'Lucas do Rio Verde' },
-  },
-  {
-    id: '3', content: 'Dica rápida: para reduzir custos com herbicida, faça o levantamento das plantas daninhas antes de aplicar. Cada cultura tem suas espécies-problema. Identificação correta = produto certo = menos custo.', title: 'Dica para reduzir custo com herbicidas',
-    category: 'DICA', likes: 88, images: [], state: 'GO', city: 'Rio Verde', createdAt: new Date(Date.now() - 48 * 3600000).toISOString(),
-    user: { id: '3', name: 'Carlos Engenheiro Agrônomo', state: 'GO', city: 'Rio Verde' },
-  },
-  {
-    id: '4', content: 'Alguém tem experiência com soja transgênica no Cerrado da Bahia? Qual variedade está dando melhor resultado em solo de cerrado argiloso? Obrigado pela ajuda!',
-    category: 'DUVIDA', likes: 12, images: [], state: 'BA', city: 'Luís Eduardo Magalhães', createdAt: new Date(Date.now() - 3 * 24 * 3600000).toISOString(),
-    user: { id: '4', name: 'Pedro Agricola', state: 'BA', city: 'LEM' },
-  },
-  {
-    id: '5', content: 'Vendo: 200 sacas de soja M8349 — semente fiscalizada, tratada, lote 2024. R$ 380/saco. Retirada na fazenda ou entrego na região. WhatsApp: (65) 99988-7766',
-    category: 'VENDA', likes: 5, images: [], state: 'MT', city: 'Sinop', createdAt: new Date(Date.now() - 4 * 24 * 3600000).toISOString(),
-    user: { id: '5', name: 'Fazenda Santa Fé', state: 'MT', city: 'Sinop' },
-  },
-]
-
 export default function CommunityScreen() {
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
+  const [posts, setPosts] = useState<Post[]>([])
   const [category, setCategory] = useState<PostCategory | 'ALL'>('ALL')
   const [refreshing, setRefreshing] = useState(false)
   const [search, setSearch] = useState('')
@@ -98,7 +69,10 @@ export default function CommunityScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🌾</Text>
-            <Text style={styles.emptyText}>Nenhum post encontrado</Text>
+            <Text style={styles.emptyText}>Comunidade em construção</Text>
+            <Text style={styles.emptySub}>
+              Em breve você vai poder trocar dicas, alertas e resultados com outros produtores.
+            </Text>
           </View>
         }
       />
@@ -208,7 +182,8 @@ const styles = StyleSheet.create({
   commentBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   commentText: { fontSize: 13, color: Colors.gray500 },
   fab: { position: 'absolute', bottom: 24, right: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 },
-  empty: { alignItems: 'center', paddingTop: 48 },
+  empty: { alignItems: 'center', paddingTop: 48, paddingHorizontal: 32 },
   emptyEmoji: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 15, color: Colors.gray500 },
+  emptyText: { fontSize: 16, color: Colors.gray700, fontWeight: '600', textAlign: 'center' },
+  emptySub: { fontSize: 13, color: Colors.gray500, textAlign: 'center', marginTop: 6, lineHeight: 18 },
 })
