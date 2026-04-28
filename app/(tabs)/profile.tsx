@@ -111,7 +111,7 @@ export default function ProfileScreen() {
           <MenuItem icon="help-circle-outline" label="Central de ajuda" onPress={() => Linking.openURL('https://solfarm.com.br/ajuda')} />
           <MenuItem icon="document-text-outline" label="Termos de uso" onPress={() => Linking.openURL('https://solfarm.com.br/termos')} />
           <MenuItem icon="lock-closed-outline" label="Política de privacidade" onPress={() => Linking.openURL('https://solfarm.com.br/privacidade')} />
-          <MenuItem icon="information-circle-outline" label="Versão 1.0.5" right={<Text style={styles.versionText}>SolFarm</Text>} />
+          <MenuItem icon="information-circle-outline" label="Versão 1.0.6" right={<Text style={styles.versionText}>SolFarm</Text>} />
         </View>
 
         {/* Logout */}

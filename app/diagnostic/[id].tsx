@@ -47,8 +47,9 @@ export default function DiagnosticScreen() {
   const { score, healthStatus, healthLabel, summary, problems, recommendations,
     recommendedCultures, fertilizationPlan, satellite, area, yieldEstimate } = diagnostic
 
-  // Guard contra payload incompleto do servidor (evita crash em score.toFixed, etc.)
-  if (!area || typeof score !== 'number' || !satellite?.indices?.ndvi) {
+  // Guard contra payload sem dados essenciais (área/score). Indices podem
+  // faltar no GET (bug conhecido do backend) — calculamos fallback do zonesMap.
+  if (!area || typeof score !== 'number') {
     return (
       <View style={styles.center}>
         <Ionicons name="alert-circle-outline" size={48} color={Colors.gray400} />
@@ -64,6 +65,15 @@ export default function DiagnosticScreen() {
   const zones = satellite?.zonesMap ?? []
   const centerLat = zones.length > 0 ? zones[Math.floor(zones.length / 2)].lat : -12.5
   const centerLng = zones.length > 0 ? zones[Math.floor(zones.length / 2)].lng : -55.7
+
+  // Calcula NDVI médio do zonesMap se o backend não devolveu satellite.indices
+  const zoneNdvis = zones.map((z) => z.ndvi).filter((n): n is number => typeof n === 'number')
+  const ndviFallback = zoneNdvis.length > 0
+    ? { mean: zoneNdvis.reduce((s, v) => s + v, 0) / zoneNdvis.length, min: Math.min(...zoneNdvis), max: Math.max(...zoneNdvis) }
+    : { mean: 0, min: 0, max: 0 }
+  const ndvi = satellite?.indices?.ndvi ?? ndviFallback
+  const ndre = satellite?.indices?.ndre
+  const ndwi = satellite?.indices?.ndwi
 
   return (
     <ScrollView style={styles.container}>
@@ -105,18 +115,24 @@ export default function DiagnosticScreen() {
             {/* Índices */}
             <Text style={styles.sectionTitle}>📡 Índices de Satélite</Text>
             <View style={styles.indicesRow}>
-              <IndexCard label="NDVI" value={satellite.indices.ndvi.mean} description="Saúde da vegetação" />
-              {satellite.indices.ndre && <IndexCard label="NDRE" value={satellite.indices.ndre.mean} description="Nitrogênio" />}
-              {satellite.indices.ndwi && <IndexCard label="NDWI" value={satellite.indices.ndwi.mean} description="Umidade" />}
+              <IndexCard label="NDVI" value={ndvi.mean} description="Saúde da vegetação" />
+              {ndre && <IndexCard label="NDRE" value={ndre.mean} description="Nitrogênio" />}
+              {ndwi && <IndexCard label="NDWI" value={ndwi.mean} description="Umidade" />}
             </View>
 
             {/* Info satélite */}
-            <View style={styles.infoCard}>
-              <Text style={styles.infoCardText}>
-                📅 Imagem: {new Date(satellite.acquisitionDate).toLocaleDateString('pt-BR')} · {satellite.satellite}
-              </Text>
-              <Text style={styles.infoCardText}>☁️ Cobertura de nuvens: {satellite.cloudCover.toFixed(0)}%</Text>
-            </View>
+            {satellite && (
+              <View style={styles.infoCard}>
+                {satellite.acquisitionDate && (
+                  <Text style={styles.infoCardText}>
+                    📅 Imagem: {new Date(satellite.acquisitionDate).toLocaleDateString('pt-BR')} · {satellite.satellite ?? 'Sentinel-2'}
+                  </Text>
+                )}
+                {typeof satellite.cloudCover === 'number' && (
+                  <Text style={styles.infoCardText}>☁️ Cobertura de nuvens: {satellite.cloudCover.toFixed(0)}%</Text>
+                )}
+              </View>
+            )}
 
             {/* Mapa de calor por zona */}
             {zones.length > 0 && (
