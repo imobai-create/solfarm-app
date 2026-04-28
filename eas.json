@@ -39,7 +39,8 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "antonioterra@solfarm.com.br"
+        "appleId": "antonioterra@solfarm.com.br",
+        "ascAppId": "6762160193"
       },
       "android": {
         "track": "internal"

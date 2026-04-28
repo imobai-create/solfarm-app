@@ -16,7 +16,6 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.solfarm.app",
-      "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "O SolFarm usa sua localização apenas para localizar suas áreas agrícolas no mapa e buscar imagens de satélite da região.",
         "NSCameraUsageDescription": "O SolFarm usa a câmera para você fotografar suas lavouras e gerar diagnóstico por IA da saúde da plantação.",
