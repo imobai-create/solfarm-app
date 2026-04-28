@@ -1,5 +1,5 @@
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Linking,
 } from 'react-native'
 import { router } from 'expo-router'
 import { useState } from 'react'
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAuthStore } from '../../src/store/auth.store'
 import { Colors } from '../../src/utils/colors'
+import { canShowPaidPlans, effectivePlan } from '../../src/utils/platform'
 
 const PLAN_LABELS: Record<string, { label: string; color: string; desc: string }> = {
   FREE: { label: 'Grátis', color: Colors.gray500, desc: '1 área · diagnóstico básico' },
@@ -19,7 +20,9 @@ export default function ProfileScreen() {
   const [notifications, setNotifications] = useState(true)
   const [alerts, setAlerts] = useState(true)
 
-  const plan = PLAN_LABELS[user?.plan ?? 'FREE']
+  const userPlan = effectivePlan(user?.plan)
+  const plan = PLAN_LABELS[userPlan]
+  const showPaidPlans = canShowPaidPlans()
 
   async function handleLogout() {
     Alert.alert('Sair', 'Deseja sair da sua conta?', [
@@ -75,14 +78,16 @@ export default function ProfileScreen() {
               <View style={[styles.planIndicator, { backgroundColor: plan.color }]} />
             </View>
             <Text style={styles.planCardDesc}>{plan.desc}</Text>
-            <TouchableOpacity
-              style={[styles.upgradeBtn, { backgroundColor: user.plan === 'FREE' ? Colors.primary : Colors.gray500 }]}
-              onPress={() => router.push('/planos')}
-            >
-              <Text style={styles.upgradeBtnText}>
-                {user.plan === 'FREE' ? '🚀 Fazer Upgrade' : '📋 Ver Planos'}
-              </Text>
-            </TouchableOpacity>
+            {showPaidPlans && (
+              <TouchableOpacity
+                style={[styles.upgradeBtn, { backgroundColor: userPlan === 'FREE' ? Colors.primary : Colors.gray500 }]}
+                onPress={() => router.push('/planos')}
+              >
+                <Text style={styles.upgradeBtnText}>
+                  {userPlan === 'FREE' ? '🚀 Fazer Upgrade' : '📋 Ver Planos'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -103,10 +108,10 @@ export default function ProfileScreen() {
         {/* Sobre */}
         <Text style={styles.sectionTitle}>Sobre</Text>
         <View style={styles.menuSection}>
-          <MenuItem icon="help-circle-outline" label="Central de ajuda" onPress={() => Alert.alert('Ajuda', 'Acesse solfarm.com.br/ajuda')} />
-          <MenuItem icon="document-text-outline" label="Termos de uso" onPress={() => {}} />
-          <MenuItem icon="lock-closed-outline" label="Política de privacidade" onPress={() => {}} />
-          <MenuItem icon="information-circle-outline" label="Versão 1.0.0" right={<Text style={styles.versionText}>SolFarm MVP</Text>} />
+          <MenuItem icon="help-circle-outline" label="Central de ajuda" onPress={() => Linking.openURL('https://solfarm.com.br/ajuda')} />
+          <MenuItem icon="document-text-outline" label="Termos de uso" onPress={() => Linking.openURL('https://solfarm.com.br/termos')} />
+          <MenuItem icon="lock-closed-outline" label="Política de privacidade" onPress={() => Linking.openURL('https://solfarm.com.br/privacidade')} />
+          <MenuItem icon="information-circle-outline" label="Versão 1.0.4" right={<Text style={styles.versionText}>SolFarm</Text>} />
         </View>
 
         {/* Logout */}
@@ -114,6 +119,17 @@ export default function ProfileScreen() {
           <Ionicons name="log-out-outline" size={20} color={Colors.danger} />
           <Text style={styles.logoutText}>Sair da conta</Text>
         </TouchableOpacity>
+
+        {/* Zona de perigo */}
+        <Text style={styles.sectionTitle}>Zona de perigo</Text>
+        <View style={styles.menuSection}>
+          <MenuItem
+            icon="trash-outline"
+            label="Excluir minha conta"
+            onPress={() => router.push('/delete-account')}
+            danger
+          />
+        </View>
       </View>
     </ScrollView>
   )
@@ -129,15 +145,16 @@ function StatCard({ value, label, icon }: { value: number; label: string; icon: 
   )
 }
 
-function MenuItem({ icon, label, onPress, right }: {
-  icon: string; label: string; onPress?: () => void; right?: React.ReactNode
+function MenuItem({ icon, label, onPress, right, danger }: {
+  icon: string; label: string; onPress?: () => void; right?: React.ReactNode; danger?: boolean
 }) {
+  const color = danger ? Colors.danger : Colors.gray600
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
-      <Ionicons name={icon as any} size={20} color={Colors.gray600} style={styles.menuIcon} />
-      <Text style={styles.menuLabel}>{label}</Text>
+      <Ionicons name={icon as any} size={20} color={color} style={styles.menuIcon} />
+      <Text style={[styles.menuLabel, danger && { color: Colors.danger, fontWeight: '600' }]}>{label}</Text>
       <View style={{ flex: 1 }} />
-      {right ?? <Ionicons name="chevron-forward" size={16} color={Colors.gray300} />}
+      {right ?? <Ionicons name="chevron-forward" size={16} color={danger ? Colors.danger : Colors.gray300} />}
     </TouchableOpacity>
   )
 }
@@ -174,6 +191,6 @@ const styles = StyleSheet.create({
   verifiedText: { fontSize: 11, color: Colors.success, fontWeight: '700' },
   notVerified: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
   versionText: { fontSize: 12, color: Colors.gray400 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.dangerBg, borderRadius: 14, height: 50, marginBottom: 40 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.dangerBg, borderRadius: 14, height: 50, marginBottom: 24 },
   logoutText: { fontSize: 15, fontWeight: '700', color: Colors.danger },
 })

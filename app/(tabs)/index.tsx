@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '../../src/store/auth.store'
 import { useAreasStore } from '../../src/store/areas.store'
 import { Colors, healthColor, cultureEmoji, cultureLabel } from '../../src/utils/colors'
+import { canShowPaidPlans, effectivePlan } from '../../src/utils/platform'
 import type { Area } from '../../src/types'
 
 export default function HomeScreen() {
@@ -79,9 +80,9 @@ export default function HomeScreen() {
           <QuickAction icon="people" label="Comunidade" color={Colors.primaryDark} onPress={() => router.push('/(tabs)/community')} />
         </View>
 
-        {/* Plano */}
-        {user?.plan === 'FREE' && (
-          <TouchableOpacity style={styles.planBanner}>
+        {/* Plano — banner de upgrade só onde planos pagos são oferecidos */}
+        {effectivePlan(user?.plan) === 'FREE' && canShowPaidPlans() && (
+          <TouchableOpacity style={styles.planBanner} onPress={() => router.push('/planos')}>
             <LinearGradient colors={[Colors.earth, Colors.warning]} style={styles.planBannerGrad}>
               <Ionicons name="rocket-outline" size={24} color={Colors.white} />
               <View style={{ flex: 1, marginLeft: 12 }}>

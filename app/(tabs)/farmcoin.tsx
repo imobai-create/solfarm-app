@@ -111,11 +111,11 @@ export default function FarmCoinScreen() {
       {/* Header carteira */}
       <LinearGradient colors={['#d97706', '#f59e0b', '#fbbf24']} style={s.walletCard}>
         <View style={s.walletIcon}>
-          <Ionicons name="logo-bitcoin" size={28} color="#fff" />
+          <Ionicons name="ribbon" size={28} color="#fff" />
         </View>
-        <Text style={s.walletLabel}>Saldo FARMCOIN</Text>
-        <Text style={s.walletBalance}>{wallet?.balance?.toFixed(2) ?? '0.00'}</Text>
-        <Text style={s.walletSub}>≈ R$ {wallet?.balance?.toFixed(2) ?? '0.00'} · Token interno SolFarm</Text>
+        <Text style={s.walletLabel}>Pontos de Recompensa</Text>
+        <Text style={s.walletBalance}>{wallet?.balance?.toFixed(0) ?? '0'}</Text>
+        <Text style={s.walletSub}>Programa de fidelidade SolFarm · sem valor monetário</Text>
         <View style={s.walletStats}>
           <View style={s.walletStat}>
             <Text style={s.statLabel}>Total emitido</Text>

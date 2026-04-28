@@ -115,7 +115,7 @@ export default function ReceitaScreen() {
         <View style={s.body}>
           <Text style={s.sectionTitle}>O que será verificado:</Text>
           {[
-            { icon: 'checkmark-shield', text: 'Conformidade com legislação MAPA/ANVISA' },
+            { icon: 'checkmark-shield', text: 'Conformidade com a legislação agrícola (MAPA/AGROFIT)' },
             { icon: 'flask', text: 'Dosagens adequadas por cultura e área' },
             { icon: 'ban', text: 'Produtos banidos ou com restrição no Brasil' },
             { icon: 'person', text: 'CREA do responsável técnico' },

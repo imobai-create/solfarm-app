@@ -2,7 +2,7 @@
   "expo": {
     "name": "SolFarm",
     "slug": "solfarm-app",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,10 +18,9 @@
       "bundleIdentifier": "com.solfarm.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Usamos sua localização para identificar sua região e exibir dados de satélite relevantes.",
-        "NSLocationAlwaysUsageDescription": "Usamos sua localização para monitoramento contínuo das suas áreas.",
-        "NSCameraUsageDescription": "Usamos a câmera para fotos das suas lavouras.",
-        "NSPhotoLibraryUsageDescription": "Acesso à galeria para adicionar fotos às suas áreas.",
+        "NSLocationWhenInUseUsageDescription": "O SolFarm usa sua localização apenas para localizar suas áreas agrícolas no mapa e buscar imagens de satélite da região.",
+        "NSCameraUsageDescription": "O SolFarm usa a câmera para você fotografar suas lavouras e gerar diagnóstico por IA da saúde da plantação.",
+        "NSPhotoLibraryUsageDescription": "O SolFarm acessa a galeria para você selecionar fotos das suas lavouras para diagnóstico por IA.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -52,7 +51,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Permite monitorar sua área rural."
+          "locationWhenInUsePermission": "O SolFarm usa sua localização apenas para localizar suas áreas agrícolas no mapa e buscar imagens de satélite da região."
         }
       ]
     ],
@@ -62,9 +61,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "493d20cb-12cc-499d-8c47-58b3d866df52"
+        "projectId": "72d7177f-4f24-4f98-8a89-851a496922bc"
       }
     },
-    "owner": "antonio88-88"
+    "owner": "antonioterra"
   }
 }

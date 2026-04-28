@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '../../src/utils/colors'
+import { canShowCommunity, canShowFarmcoin } from '../../src/utils/platform'
 
 export default function TabsLayout() {
   return (
@@ -51,8 +52,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="farmcoin"
         options={{
-          title: 'FARMCOIN',
-          tabBarIcon: ({ color, size }) => <Ionicons name="logo-bitcoin" size={size} color={color} />,
+          title: 'Recompensas',
+          tabBarIcon: ({ color, size }) => <Ionicons name="ribbon" size={size} color={color} />,
+          href: canShowFarmcoin() ? undefined : null,
         }}
       />
       <Tabs.Screen
@@ -74,6 +76,7 @@ export default function TabsLayout() {
         options={{
           title: 'Comunidade',
           tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          href: canShowCommunity() ? undefined : null,
         }}
       />
       <Tabs.Screen

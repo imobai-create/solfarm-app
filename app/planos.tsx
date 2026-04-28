@@ -8,8 +8,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAuthStore } from '../src/store/auth.store'
 import { Colors } from '../src/utils/colors'
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://solfarm-api-production.up.railway.app'
+import { canShowPaidPlans } from '../src/utils/platform'
+import { api, getApiError } from '../src/services/api'
 
 const PLANOS = [
   {
@@ -60,21 +60,25 @@ const PLANOS = [
     recursos: [
       'Áreas ilimitadas',
       'IA avançada (Claude Vision)',
-      'Score agrícola + crédito rural',
+      'Score agronômico avançado',
       'API para integração ERP',
       'Relatórios PDF automáticos',
       'Gerente dedicado',
-      'FARMCOIN bônus mensal',
+      'Pontos de recompensa bônus mensal',
     ],
     limites: { areas: 999, diagnosticos: 999 },
   },
 ]
 
 export default function PlanosScreen() {
-  const { user, token } = useAuthStore()
+  const { user } = useAuthStore()
   const [loading, setLoading] = useState<string | null>(null)
 
   const planoAtual = user?.plan ?? 'FREE'
+
+  if (!canShowPaidPlans()) {
+    return <PlanosUnavailable />
+  }
 
   async function assinar(planoId: string) {
     if (planoId === 'FREE') return
@@ -86,24 +90,11 @@ export default function PlanosScreen() {
     setLoading(planoId)
 
     try {
-      const res = await fetch(`${API_URL}/payments/checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          plan: planoId,
-          billingType: 'UNDEFINED', // link universal: PIX + cartão + boleto
-          recurrent: true,
-        }),
+      const { data } = await api.post('/payments/checkout', {
+        plan: planoId,
+        billingType: 'UNDEFINED', // link universal: PIX + cartão + boleto
+        recurrent: true,
       })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error ?? 'Erro ao gerar cobrança')
-      }
 
       if (data.payment?.invoiceUrl) {
         // Abre a página segura do Asaas (aceita PIX, cartão e boleto)
@@ -118,8 +109,8 @@ export default function PlanosScreen() {
       } else {
         Alert.alert('Pagamento', 'Link de pagamento gerado. Verifique seu email.')
       }
-    } catch (err: any) {
-      Alert.alert('Erro', err.message ?? 'Não foi possível iniciar o pagamento.')
+    } catch (err) {
+      Alert.alert('Erro', getApiError(err))
     } finally {
       setLoading(null)
     }
@@ -254,8 +245,38 @@ export default function PlanosScreen() {
   )
 }
 
+function PlanosUnavailable() {
+  return (
+    <View style={styles.container}>
+      <LinearGradient colors={['#145232', '#16a34a']} style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Planos SolFarm</Text>
+      </LinearGradient>
+
+      <View style={styles.unavailableBody}>
+        <Ionicons name="leaf-outline" size={64} color={Colors.primary} />
+        <Text style={styles.unavailableTitle}>Você está no plano Grátis</Text>
+        <Text style={styles.unavailableText}>
+          Você pode usar todos os recursos do plano Grátis: cadastro de 1 área,
+          diagnóstico básico, marketplace e comunidade.
+        </Text>
+        <Text style={styles.unavailableNote}>
+          Recursos adicionais estão em desenvolvimento e estarão disponíveis em
+          uma próxima atualização do aplicativo.
+        </Text>
+      </View>
+    </View>
+  )
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
+  unavailableBody: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
+  unavailableTitle: { fontSize: 22, fontWeight: '800', color: '#111827', textAlign: 'center' },
+  unavailableText: { fontSize: 15, color: '#374151', textAlign: 'center', lineHeight: 22 },
+  unavailableNote: { fontSize: 13, color: '#6b7280', textAlign: 'center', lineHeight: 20, marginTop: 8 },
   header: { paddingTop: 60, paddingBottom: 24, paddingHorizontal: 20 },
   backBtn: { marginBottom: 12 },
   headerTitle: { fontSize: 26, fontWeight: '800', color: '#fff' },
