@@ -14,12 +14,13 @@ import type { STACSearchResult } from '../../src/types'
 
 export default function AreaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { selectedArea, fetchArea, isLoading } = useAreasStore()
+  const { selectedArea, fetchArea, deleteArea, isLoading } = useAreasStore()
   const [refreshing, setRefreshing] = useState(false)
   const [stacImages, setStacImages] = useState<STACSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isProcessing, setIsProcessing] = useState<string | null>(null)
   const [isGeneratingDiag, setIsGeneratingDiag] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => { if (id) fetchArea(id) }, [id])
 
@@ -86,6 +87,32 @@ export default function AreaDetailScreen() {
     } finally {
       setIsGeneratingDiag(false)
     }
+  }
+
+  function confirmDelete() {
+    if (!id || !selectedArea) return
+    Alert.alert(
+      'Excluir área?',
+      `Tem certeza que deseja excluir "${selectedArea.name}"? Esta ação apaga também todos os diagnósticos e imagens dessa área. Não dá para desfazer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            setIsDeleting(true)
+            try {
+              await deleteArea(id)
+              router.replace('/(tabs)/areas')
+            } catch (err: any) {
+              Alert.alert('Erro', err?.response?.data?.error ?? 'Não foi possível excluir a área agora.')
+            } finally {
+              setIsDeleting(false)
+            }
+          },
+        },
+      ]
+    )
   }
 
   if (isLoading && !refreshing) {
@@ -236,6 +263,23 @@ export default function AreaDetailScreen() {
             ))}
           </View>
         )}
+
+        {/* Excluir área */}
+        <TouchableOpacity
+          style={styles.deleteAreaBtn}
+          onPress={confirmDelete}
+          disabled={isDeleting}
+          activeOpacity={0.7}
+        >
+          {isDeleting ? (
+            <ActivityIndicator color={Colors.danger} />
+          ) : (
+            <>
+              <Ionicons name="trash-outline" size={18} color={Colors.danger} />
+              <Text style={styles.deleteAreaText}>Excluir esta área</Text>
+            </>
+          )}
+        </TouchableOpacity>
       </View>
     </ScrollView>
   )
@@ -287,4 +331,16 @@ const styles = StyleSheet.create({
   diagHistStatus: { fontSize: 13, fontWeight: '700', color: Colors.gray800 },
   diagHistDate: { fontSize: 11, color: Colors.gray400, marginTop: 2 },
   diagHistScore: { fontSize: 16, fontWeight: '800', marginRight: 4 },
+  deleteAreaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.dangerBg,
+    borderRadius: 14,
+    height: 50,
+    marginTop: 24,
+    marginBottom: 32,
+  },
+  deleteAreaText: { fontSize: 15, fontWeight: '700', color: Colors.danger },
 })
