@@ -2,7 +2,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Alert,
   ScrollView, TextInput, ActivityIndicator, Platform,
 } from 'react-native'
-import MapView, { Polygon, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView, { Polygon, Polyline, Circle, PROVIDER_GOOGLE } from 'react-native-maps'
 import { router } from 'expo-router'
 import { useState, useRef } from 'react'
 import * as Location from 'expo-location'
@@ -132,18 +132,35 @@ export default function NewAreaScreen() {
           mapType="satellite"
           showsUserLocation
           showsMyLocationButton={false}
+          rotateEnabled={false}
+          pitchEnabled={false}
         >
+          {/* Pontos como Circle (não capturam toque, ao contrário do Marker) */}
           {points.map((p, i) => (
-            <Marker key={i} coordinate={p} anchor={{ x: 0.5, y: 0.5 }}>
-              <View style={styles.dot} />
-            </Marker>
+            <Circle
+              key={`pt-${i}`}
+              center={p}
+              radius={4}
+              strokeColor={Colors.white}
+              fillColor={Colors.primary}
+              strokeWidth={2}
+            />
           ))}
+          {/* Linha conectando os pontos enquanto o polígono não está fechado */}
+          {points.length >= 2 && points.length < 3 && (
+            <Polyline
+              coordinates={points}
+              strokeColor={Colors.primary}
+              strokeWidth={2}
+            />
+          )}
           {points.length >= 3 && (
             <Polygon
               coordinates={points}
               strokeColor={Colors.primary}
               strokeWidth={3}
               fillColor="rgba(22,163,74,0.25)"
+              tappable={false}
             />
           )}
         </MapView>

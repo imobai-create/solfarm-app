@@ -88,8 +88,8 @@ export default function HomeScreen() {
             <LinearGradient colors={[Colors.earth, Colors.warning]} style={styles.planBannerGrad}>
               <Ionicons name="rocket-outline" size={24} color={Colors.white} />
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.planBannerTitle}>Plano Grátis — 1 área</Text>
-                <Text style={styles.planBannerSub}>Faça upgrade e monitore até 5 áreas com diagnóstico completo</Text>
+                <Text style={styles.planBannerTitle}>Plano Grátis — até 5 áreas</Text>
+                <Text style={styles.planBannerSub}>Faça upgrade pra ter áreas ilimitadas e diagnóstico completo</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={Colors.white} />
             </LinearGradient>

@@ -10,7 +10,7 @@ import { Colors } from '../../src/utils/colors'
 import { canShowPaidPlans, effectivePlan } from '../../src/utils/platform'
 
 const PLAN_LABELS: Record<string, { label: string; color: string; desc: string }> = {
-  FREE: { label: 'Grátis', color: Colors.gray500, desc: '1 área · diagnóstico básico' },
+  FREE: { label: 'Grátis', color: Colors.gray500, desc: 'Até 5 áreas · 100 ha · diagnóstico básico' },
   CAMPO: { label: 'Campo', color: Colors.primary, desc: 'até 5 áreas · diagnóstico completo' },
   FAZENDA: { label: 'Fazenda', color: Colors.earth, desc: 'Ilimitado · IA avançada · API' },
 }
@@ -111,7 +111,7 @@ export default function ProfileScreen() {
           <MenuItem icon="help-circle-outline" label="Central de ajuda" onPress={() => Linking.openURL('https://solfarm.com.br/ajuda')} />
           <MenuItem icon="document-text-outline" label="Termos de uso" onPress={() => Linking.openURL('https://solfarm.com.br/termos')} />
           <MenuItem icon="lock-closed-outline" label="Política de privacidade" onPress={() => Linking.openURL('https://solfarm.com.br/privacidade')} />
-          <MenuItem icon="information-circle-outline" label="Versão 1.0.8" right={<Text style={styles.versionText}>SolFarm</Text>} />
+          <MenuItem icon="information-circle-outline" label="Versão 1.0.9" right={<Text style={styles.versionText}>SolFarm</Text>} />
         </View>
 
         {/* Logout */}

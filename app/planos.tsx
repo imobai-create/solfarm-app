@@ -21,13 +21,13 @@ const PLANOS = [
     gradient: ['#6b7280', '#4b5563'] as [string, string],
     icone: '🌱',
     recursos: [
-      '1 área cadastrada',
+      'Até 5 áreas cadastradas (100 ha total)',
       'Diagnóstico NDVI básico',
       'Histórico 30 dias',
       'Marketplace (visualização)',
       'Comunidade',
     ],
-    limites: { areas: 1, diagnosticos: 3 },
+    limites: { areas: 5, diagnosticos: 3 },
   },
   {
     id: 'CAMPO',
