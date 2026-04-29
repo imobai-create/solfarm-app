@@ -62,12 +62,18 @@ export default function DiagnosticScreen() {
 
   const safeProblems = problems ?? []
   const safeRecommendations = recommendations ?? []
-  const zones = satellite?.zonesMap ?? []
+  const allZones = satellite?.zonesMap ?? []
+  // Só zonas com coordenadas válidas — qualquer NaN/undefined em lat/lng crasha
+  // o MapView nativo do iOS sem possibilidade de catch JavaScript.
+  const zones = allZones.filter((z) =>
+    typeof z?.lat === 'number' && Number.isFinite(z.lat) &&
+    typeof z?.lng === 'number' && Number.isFinite(z.lng)
+  )
   const centerLat = zones.length > 0 ? zones[Math.floor(zones.length / 2)].lat : -12.5
   const centerLng = zones.length > 0 ? zones[Math.floor(zones.length / 2)].lng : -55.7
 
   // Calcula NDVI médio do zonesMap se o backend não devolveu satellite.indices
-  const zoneNdvis = zones.map((z) => z.ndvi).filter((n): n is number => typeof n === 'number')
+  const zoneNdvis = zones.map((z) => z.ndvi).filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
   const ndviFallback = zoneNdvis.length > 0
     ? { mean: zoneNdvis.reduce((s, v) => s + v, 0) / zoneNdvis.length, min: Math.min(...zoneNdvis), max: Math.max(...zoneNdvis) }
     : { mean: 0, min: 0, max: 0 }
@@ -159,9 +165,9 @@ export default function DiagnosticScreen() {
                 </MapView>
                 <View style={styles.zonesGrid}>
                   {zones.map((z) => (
-                    <View key={z.zone} style={[styles.zoneChip, { borderColor: ndviColor(z.ndvi) }]}>
+                    <View key={z.zone} style={[styles.zoneChip, { borderColor: ndviColor(z.ndvi ?? 0) }]}>
                       <Text style={styles.zoneLabel}>{z.zone}</Text>
-                      <Text style={[styles.zoneNdvi, { color: ndviColor(z.ndvi) }]}>{z.ndvi.toFixed(2)}</Text>
+                      <Text style={[styles.zoneNdvi, { color: ndviColor(z.ndvi ?? 0) }]}>{(z.ndvi ?? 0).toFixed(2)}</Text>
                       <Text style={styles.zoneStatus}>{z.status}</Text>
                     </View>
                   ))}
@@ -181,8 +187,8 @@ export default function DiagnosticScreen() {
                   </View>
                   <View style={styles.yieldDivider} />
                   <View style={styles.yieldItem}>
-                    <Text style={styles.yieldValue}>{yieldEstimate.totalEstimate.toLocaleString()}</Text>
-                    <Text style={styles.yieldUnit}>{yieldEstimate.unit.replace('/ha', '').trim()}</Text>
+                    <Text style={styles.yieldValue}>{(yieldEstimate.totalEstimate ?? 0).toLocaleString()}</Text>
+                    <Text style={styles.yieldUnit}>{(yieldEstimate.unit ?? '').replace('/ha', '').trim()}</Text>
                     <Text style={styles.yieldLabel}>Total estimado</Text>
                   </View>
                   <View style={styles.yieldDivider} />
@@ -229,7 +235,7 @@ export default function DiagnosticScreen() {
                       <Text style={styles.affectedArea}>{p.affectedArea.toFixed(0)}% da área</Text>
                     )}
                   </View>
-                  <Text style={styles.problemType}>{p.type.replace(/_/g, ' ')}</Text>
+                  <Text style={styles.problemType}>{(p.type ?? '').replace(/_/g, ' ')}</Text>
                   <Text style={styles.problemDesc}>{p.description}</Text>
                   {p.zone && <Text style={styles.problemZone}>📍 Zonas: {p.zone}</Text>}
                 </View>
@@ -299,12 +305,12 @@ export default function DiagnosticScreen() {
             {(fertilizationPlan ?? []).map((z, i) => (
               <View key={i} style={[styles.vraCard, z.priority === 'URGENTE' && styles.vraCardUrgente]}>
                 <View style={styles.vraCardHeader}>
-                  <View style={[styles.zoneCircle, { backgroundColor: ndviColor(z.ndvi) }]}>
+                  <View style={[styles.zoneCircle, { backgroundColor: ndviColor(z.ndvi ?? 0) }]}>
                     <Text style={styles.zoneCircleText}>{z.zone}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.vraZoneName}>Zona {z.zone}</Text>
-                    <Text style={[styles.vraStatus, { color: ndviColor(z.ndvi) }]}>NDVI {z.ndvi.toFixed(2)} — {z.status}</Text>
+                    <Text style={[styles.vraStatus, { color: ndviColor(z.ndvi ?? 0) }]}>NDVI {(z.ndvi ?? 0).toFixed(2)} — {z.status ?? '—'}</Text>
                   </View>
                   {z.priority === 'URGENTE' && (
                     <View style={styles.urgentBadge}><Text style={styles.urgentText}>URGENTE</Text></View>
@@ -325,11 +331,12 @@ export default function DiagnosticScreen() {
   )
 }
 
-function IndexCard({ label, value, description }: { label: string; value: number; description: string }) {
+function IndexCard({ label, value, description }: { label: string; value: number | null | undefined; description: string }) {
+  const v = typeof value === 'number' && Number.isFinite(value) ? value : 0
   return (
-    <View style={[styles.indexCard, { borderTopColor: ndviColor(value), borderTopWidth: 3 }]}>
+    <View style={[styles.indexCard, { borderTopColor: ndviColor(v), borderTopWidth: 3 }]}>
       <Text style={styles.indexLabel}>{label}</Text>
-      <Text style={[styles.indexValue, { color: ndviColor(value) }]}>{value.toFixed(3)}</Text>
+      <Text style={[styles.indexValue, { color: ndviColor(v) }]}>{v.toFixed(3)}</Text>
       <Text style={styles.indexDesc}>{description}</Text>
     </View>
   )
