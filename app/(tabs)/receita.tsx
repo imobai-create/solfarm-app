@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { api } from '../../src/services/api'
 import { Colors } from '../../src/utils/colors'
+import { ensureCameraPermission, ensureMediaLibraryPermission } from '../../src/utils/permissions'
 
 type Produto = {
   nome: string
@@ -61,13 +62,11 @@ export default function ReceitaScreen() {
   const [result, setResult] = useState<ReceitaResult | null>(null)
 
   async function pickImage(fromCamera: boolean) {
-    if (fromCamera) {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync()
-      if (status !== 'granted') {
-        Alert.alert('Permissão necessária', 'Precisamos acessar sua câmera.')
-        return
-      }
-    }
+    const ok = fromCamera
+      ? await ensureCameraPermission()
+      : await ensureMediaLibraryPermission()
+    if (!ok) return
+
     const res = fromCamera
       ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 })
       : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 })

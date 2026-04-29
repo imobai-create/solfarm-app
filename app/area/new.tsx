@@ -9,6 +9,7 @@ import * as Location from 'expo-location'
 import { Ionicons } from '@expo/vector-icons'
 import { useAreasStore } from '../../src/store/areas.store'
 import { Colors, cultureLabel } from '../../src/utils/colors'
+import { ensureLocationPermission } from '../../src/utils/permissions'
 import type { CultureType, BiomeType, GeoPolygon } from '../../src/types'
 
 interface Coordinate { latitude: number; longitude: number }
@@ -44,8 +45,8 @@ export default function NewAreaScreen() {
   async function goToMyLocation() {
     setIsLocating(true)
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync()
-      if (status !== 'granted') { Alert.alert('Permissão negada', 'Habilite a localização nas configurações.'); return }
+      const ok = await ensureLocationPermission()
+      if (!ok) return
       const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High })
       const { latitude, longitude } = loc.coords
       setRegion({ latitude, longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 })

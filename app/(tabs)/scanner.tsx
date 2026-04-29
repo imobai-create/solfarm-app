@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { api } from '../../src/services/api'
 import { Colors } from '../../src/utils/colors'
+import { ensureCameraPermission, ensureMediaLibraryPermission, ensureLocationPermission } from '../../src/utils/permissions'
 
 type ScanResult = {
   localizacao: {
@@ -71,14 +72,10 @@ export default function ScannerScreen() {
   const [result, setResult] = useState<ScanResult | null>(null)
 
   async function pickImage(fromCamera: boolean) {
-    // Permissões
-    if (fromCamera) {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync()
-      if (status !== 'granted') {
-        Alert.alert('Permissão necessária', 'Precisamos acessar sua câmera para fotografar a área.')
-        return
-      }
-    }
+    const ok = fromCamera
+      ? await ensureCameraPermission()
+      : await ensureMediaLibraryPermission()
+    if (!ok) return
 
     const opts: ImagePicker.ImagePickerOptions = {
       mediaTypes: ['images'],
